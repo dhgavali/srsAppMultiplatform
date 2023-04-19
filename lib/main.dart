@@ -5,15 +5,18 @@ import 'package:srsappmultiplatform/data/datasources/auth_local_storage.dart';
 import 'package:srsappmultiplatform/presentation/views/trainee_dashboard_screen.dart';
 import 'package:srsappmultiplatform/data/datasources/remote/remote_data_source.dart';
 import 'package:srsappmultiplatform/core/di/service_locator.dart';
+import 'package:srsappmultiplatform/domain/repositories/WorkoutPlanRepository.dart';
 import 'package:srsappmultiplatform/presentation/viewmodels/UserViewModel.dart';
 import 'package:srsappmultiplatform/presentation/views/login_screen.dart';
 import 'package:srsappmultiplatform/presentation/views/register_screen.dart';
+import 'package:srsappmultiplatform/presentation/views/ExerciseProgram_screen.dart';
+import 'package:srsappmultiplatform/presentation/views/ChatPage_screen.dart';
+import 'package:srsappmultiplatform/presentation/views/ProfilePage_screen.dart';
 import 'package:srsappmultiplatform/data/repositories/user_repositoryImpl.dart'; // Make sure this import is correct
-
 
 void main() {
   setupServiceLocator();
-  runApp( MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -23,10 +26,8 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider<UserViewModel>(
           create: (_) => UserViewModel(
-            userRepository: UserRepositoryImpl(
-              remoteDataSource: RemoteDataSource( authLocalStorage: AuthLocalStorage()),
-              authLocalStorage: AuthLocalStorage(),
-            ),
+            userRepository: GetIt.I.get<UserRepositoryImpl>(),
+            workoutPlanRepository: GetIt.I.get<WorkoutPlanRepository>(),
           ),
         ),
       ],
@@ -40,49 +41,90 @@ class MyApp extends StatelessWidget {
           '/': (context) => LoginScreen(),
           '/login': (context) => LoginScreen(),
           '/register': (context) => RegisterScreen(),
-          '/traineeDashboard': (context) => TraineeDashboardScreen()
+          '/traineeDashboard': (context) => MyHomePage(),
         },
       ),
-
     );
-
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  final int index;
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+  MyHomePage({Key? key, this.index = 0}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  int _currentIndex = 0;
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.index;
+    _pageController = PageController(initialPage: _currentIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    UserViewModel userViewModel = Provider.of<UserViewModel>(context);
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text("My Home Page"),
-      ),
-      body: Center(
-        child: Text("Welcome to My Home Page"),
-      ),
+
+        body: PageView(
+          controller: _pageController,
+          physics: NeverScrollableScrollPhysics(),
+          children: [
+            TraineeDashboardScreen(),
+            ExerciseProgram(),
+            ChatPage(),
+            ProfilePage(user: userViewModel.user!!,),
+
+
+          ],
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+        icon: Icon(Icons.dashboard),
+    label: 'Dashboard',
+    ),
+    BottomNavigationBarItem(
+    icon: Icon(Icons.fitness_center),
+    label: 'Program',
+    ),
+    BottomNavigationBarItem(
+    icon: Icon(Icons.chat),
+    label: 'Chat',
+    ),
+    BottomNavigationBarItem(
+    icon: Icon(Icons.person),
+    label: 'Profile',
+    ),
+    ],
+    currentIndex: _currentIndex,
+    unselectedItemColor: Colors.black,
+    selectedItemColor: Colors.blue,
+    onTap: (int index) {
+      setState(() {
+        _currentIndex = index;
+        _pageController.animateToPage(
+          index,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.ease,
+        );
+      });
+    },
+        ),
     );
   }
-
-  }
-
-
-
-
+}

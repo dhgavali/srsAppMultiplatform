@@ -4,7 +4,7 @@ import 'package:srsappmultiplatform/core/result.dart';
 import 'package:srsappmultiplatform/domain/entities/User.dart';
 import 'package:srsappmultiplatform/domain/entities/Register.dart';
 import 'package:srsappmultiplatform/data/datasources/auth_local_storage.dart';
-
+import 'package:srsappmultiplatform/domain/entities/WorkoutPlanData.dart';
 class RemoteDataSource {
   final String _baseUrl = "http://192.168.0.150:3001";
   final AuthLocalStorage _authLocalStorage;
@@ -181,6 +181,47 @@ class RemoteDataSource {
     }
   }
 
+  Future<Result<List<WorkoutPlan>>> fetchWorkoutPlansByUserId(String userId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/workout-plans?userId=$userId'),
+        headers: await _headers,
+      );
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        final List<dynamic> workoutPlansJson = jsonResponse['data']['workoutPlans'];
+        final List<WorkoutPlan> workoutPlans = workoutPlansJson.map((json) => WorkoutPlan.fromJson(json)).toList();
+
+        return Result.success(workoutPlans);
+      } else {
+        return Result.failure('Failed to fetch workout plans for user $userId');
+      }
+    } catch (e) {
+      return Result.failure(e.toString());
+    }
+  }
+
+  Future<Result<List<WorkoutPlan>>> fetchCompletedWorkoutPlans(String userId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/workout-plans?userId=$userId&completed=true'),
+        headers: await _headers,
+      );
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        final List<dynamic> workoutPlansJson = jsonResponse['data']['workoutPlans'];
+        final List<WorkoutPlan> workoutPlans = workoutPlansJson.map((json) => WorkoutPlan.fromJson(json)).toList();
+
+        return Result.success(workoutPlans);
+      } else {
+        return Result.failure('Failed to fetch completed workout plans for user $userId');
+      }
+    } catch (e) {
+      return Result.failure(e.toString());
+    }
+  }
 
 }
 
