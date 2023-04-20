@@ -6,7 +6,6 @@ import 'package:srsappmultiplatform/presentation/viewmodels/UserViewModel.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:srsappmultiplatform/presentation/widgets/CustomMaxExerciseCard.dart';
 
-
 class TraineeDashboardScreen extends StatefulWidget {
   @override
   _TraineeDashboardScreenState createState() => _TraineeDashboardScreenState();
@@ -25,13 +24,12 @@ class _TraineeDashboardScreenState extends State<TraineeDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: Consumer<UserViewModel>(
         builder: (context, userViewModel, _) {
           final user = userViewModel.user;
           return SingleChildScrollView(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(16.0,50,16.0,16.0),
+              padding: EdgeInsets.fromLTRB(16.0, 50, 16.0, 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
@@ -51,25 +49,50 @@ class _TraineeDashboardScreenState extends State<TraineeDashboardScreen> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(100),
                             color: Colors.pinkAccent.withOpacity(0.1),
-
                           ),
-                          child: Icon(Icons.notifications, color: Colors
-                              .black87,),
+                          child: Icon(
+                            Icons.notifications,
+                            color: Colors.black87,
+                          ),
                         ),
                       ],
                     ),
-                  SizedBox(height: 25,),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-                  child :Row(
-                    children: [
-                      CustomMaxExerciseCard(icon:Icons.sports_gymnastics,title:  "Max PushUps" ,value: user?.exerciseLevel?.pushUpReps?.toString() ?? '0'),
-                      CustomMaxExerciseCard(icon:Icons.sports_gymnastics,title:  "Max PullUps" ,value: user?.exerciseLevel?.pullUpReps?.toString() ?? '0'),
-                      CustomMaxExerciseCard(icon:Icons.sports_gymnastics,title:  "Max BenchPress" ,value: user?.exerciseLevel?.benchPress?.toString() ?? '0'),
-                    ],
+                  SizedBox(
+                    height: 25,
                   ),
-            ),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        CustomMaxExerciseCard(
+                            icon: Icons.sports_gymnastics,
+                            title: "Max PushUps",
+                            value:
+                                user?.exerciseLevel?.pushUpReps?.toString() ??
+                                    '0'),
+                        CustomMaxExerciseCard(
+                            icon: Icons.sports_gymnastics,
+                            title: "Max PullUps",
+                            value:
+                                user?.exerciseLevel?.pullUpReps?.toString() ??
+                                    '0'),
+                        CustomMaxExerciseCard(
+                            icon: Icons.sports_gymnastics,
+                            title: "Max BenchPress",
+                            value:
+                                user?.exerciseLevel?.benchPress?.toString() ??
+                                    '0'),
+                      ],
+                    ),
+                  ),
                   SizedBox(height: 32.0),
+                  Text(
+                    "Volume Of Training",
+                    style: GoogleFonts.lato(
+                      color: Colors.black87,
+                     textStyle: TextStyle(fontSize: 25),
+                    ),
+                  ),
                   DropdownButton<String>(
                     value: selectedTimeRange,
                     items: [
@@ -150,6 +173,9 @@ class _TraineeDashboardScreenState extends State<TraineeDashboardScreen> {
           TrainingVolume('Day 2', 10),
           TrainingVolume('Day 3', 30),
           TrainingVolume('Day 4', 25),
+          TrainingVolume('Day 5', 25),
+          TrainingVolume('Day 6', 25),
+          TrainingVolume('Day 7', 25),
         ];
       case 'Month':
         return [
@@ -176,4 +202,3 @@ class TrainingVolume {
 
   TrainingVolume(this.week, this.volume);
 }
-

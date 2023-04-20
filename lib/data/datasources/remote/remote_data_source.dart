@@ -6,7 +6,7 @@ import 'package:srsappmultiplatform/domain/entities/Register.dart';
 import 'package:srsappmultiplatform/data/datasources/auth_local_storage.dart';
 import 'package:srsappmultiplatform/domain/entities/WorkoutPlanData.dart';
 class RemoteDataSource {
-  final String _baseUrl = "http://192.168.1.11:3001";
+  final String _baseUrl = "http://192.168.0.150:3001";
   final AuthLocalStorage _authLocalStorage;
 
   final headers = {
