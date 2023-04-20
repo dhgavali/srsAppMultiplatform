@@ -85,9 +85,10 @@ class _MyHomePageState extends State<MyHomePage> {
           physics: NeverScrollableScrollPhysics(),
           children: [
             TraineeDashboardScreen(),
-            ExerciseProgram(),
+            ExerciseProgram(userId: userViewModel.user?.id ?? "",),
             ChatPage(),
             ProfilePage(user: userViewModel.user!!,),
+
 
 
           ],

@@ -3,6 +3,9 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:provider/provider.dart';
 import 'package:srsappmultiplatform/main.dart';
 import 'package:srsappmultiplatform/presentation/viewmodels/UserViewModel.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:srsappmultiplatform/presentation/widgets/CustomMaxExerciseCard.dart';
+
 
 class TraineeDashboardScreen extends StatefulWidget {
   @override
@@ -22,25 +25,50 @@ class _TraineeDashboardScreenState extends State<TraineeDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Trainee Dashboard'),
-      ),
+
       body: Consumer<UserViewModel>(
         builder: (context, userViewModel, _) {
           final user = userViewModel.user;
           return SingleChildScrollView(
             child: Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: EdgeInsets.fromLTRB(16.0,50,16.0,16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   if (user != null)
-                    Text(
-                      'Welcome, ${user.username}',
-                      style: TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Welcome, ${user.username}',
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                        Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(100),
+                            color: Colors.pinkAccent.withOpacity(0.1),
+
+                          ),
+                          child: Icon(Icons.notifications, color: Colors
+                              .black87,),
+                        ),
+                      ],
                     ),
+                  SizedBox(height: 25,),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+                  child :Row(
+                    children: [
+                      CustomMaxExerciseCard(icon:Icons.sports_gymnastics,title:  "Max PushUps" ,value: user?.exerciseLevel?.pushUpReps?.toString() ?? '0'),
+                      CustomMaxExerciseCard(icon:Icons.sports_gymnastics,title:  "Max PullUps" ,value: user?.exerciseLevel?.pullUpReps?.toString() ?? '0'),
+                      CustomMaxExerciseCard(icon:Icons.sports_gymnastics,title:  "Max BenchPress" ,value: user?.exerciseLevel?.benchPress?.toString() ?? '0'),
+                    ],
+                  ),
+            ),
                   SizedBox(height: 32.0),
                   DropdownButton<String>(
                     value: selectedTimeRange,
@@ -95,10 +123,8 @@ class _TraineeDashboardScreenState extends State<TraineeDashboardScreen> {
           );
         },
       ),
-
     );
   }
-
 
   // Create sample data for the chart
   List<charts.Series<TrainingVolume, String>> _createSampleData() {
@@ -144,10 +170,10 @@ class _TraineeDashboardScreenState extends State<TraineeDashboardScreen> {
   }
 }
 
-
 class TrainingVolume {
   final String week;
   final int volume;
 
   TrainingVolume(this.week, this.volume);
 }
+

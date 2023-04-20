@@ -32,7 +32,7 @@ class UserRepositoryImpl extends UserRepository {
 
       await _authLocalStorage.saveAuthToken(user.token);
 
-      print("Login success: ${user.exerciseLevel.toJson().toString()}");
+      print("Login success: ${user.exerciseLevel?.toJson()?.toString()}");
 
       return Result.success(user);
     } catch (e) {

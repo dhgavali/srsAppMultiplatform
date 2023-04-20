@@ -6,11 +6,11 @@ class User {
   final String phone;
   final String? role;
   final String dateOfBirth;
-  final ExerciseLevel exerciseLevel;
-  final int height;
-  final int weight;
-  final int muscleMass;
-  final int bodyFatPercentage;
+  final ExerciseLevel? exerciseLevel;
+  final int? height;
+  final int? weight;
+  final int? muscleMass;
+  final int? bodyFatPercentage;
 
   User({
     required this.id,
@@ -20,11 +20,11 @@ class User {
     this.role,
     required this.dateOfBirth,
     required this.phone,
-    required this.exerciseLevel,
-    required this.height,
-    required this.weight,
-    required this.muscleMass,
-    required this.bodyFatPercentage,
+     this.exerciseLevel,
+     this.height,
+     this.weight,
+     this.muscleMass,
+     this.bodyFatPercentage,
   });
   factory User.fromJson(Map<String, dynamic> jsonMap) {
     return User(
@@ -72,18 +72,18 @@ class User {
 // Other methods or properties as needed
 }
 class ExerciseLevel {
-  final int squat;
-  final int benchPress;
-  final int pullUpReps;
-  final int pushUpReps;
-  final int deadLift;
+  final int? squat;
+  final int? benchPress;
+  final int? pullUpReps;
+  final int? pushUpReps;
+  final int? deadLift;
 
   ExerciseLevel({
-    required this.squat,
-    required this.benchPress,
-    required this.pullUpReps,
-    required this.pushUpReps,
-    required this.deadLift,
+     this.squat,
+     this.benchPress,
+     this.pullUpReps,
+     this.pushUpReps,
+     this.deadLift,
   });
 
   factory ExerciseLevel.fromJson(Map<String, dynamic> json) {

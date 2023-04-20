@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:srsappmultiplatform/domain/entities/User.dart';
 import 'package:srsappmultiplatform/presentation/widgets/CustomProfileRow.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePageAdminSide extends StatefulWidget {
   final User user;
 
-  ProfilePage({required this.user});
+  ProfilePageAdminSide({required this.user});
 
   @override
-  State<ProfilePage> createState() => ProfilePageState();
+  State<ProfilePageAdminSide> createState() => ProfilePageAdminSideState();
 }
 
-class ProfilePageState extends State<ProfilePage>
+class ProfilePageAdminSideState extends State<ProfilePageAdminSide>
     with TickerProviderStateMixin {
   final List<IconData> icons = [
     Icons.person,

@@ -1,3 +1,4 @@
+import 'dart:convert';
 class Exercise {
   String id;
   String name;
@@ -5,7 +6,9 @@ class Exercise {
   int reps;
   int weight;
   String photo;
+  String notes;
   String video;
+  bool completed;
 
   Exercise({
     required this.id,
@@ -13,8 +16,10 @@ class Exercise {
     required this.sets,
     required this.reps,
     required this.weight,
+    required this.notes,
     required this.photo,
     required this.video,
+    required this.completed,
   });
 
   factory Exercise.fromJson(Map<String, dynamic> json) {
@@ -26,6 +31,8 @@ class Exercise {
       weight: json['weight'],
       photo: json['photo'],
       video: json['video'],
+      completed: json['completed'],
+      notes: json['notes'],
     );
   }
 }
@@ -35,7 +42,6 @@ class WorkoutPlan {
   String userId;
   int week;
   int day;
-  bool completed;
   List<Exercise> exercises;
 
   WorkoutPlan({
@@ -43,7 +49,6 @@ class WorkoutPlan {
     required this.userId,
     required this.week,
     required this.day,
-    required this.completed,
     required this.exercises,
   });
 
@@ -53,8 +58,44 @@ class WorkoutPlan {
       userId: json['userId'],
       week: json['week'],
       day: json['day'],
-      completed: json['completed'],
       exercises: (json['exercises'] as List).map((e) => Exercise.fromJson(e)).toList(),
+    );
+  }
+}
+
+
+
+class ApiResponse {
+  String status;
+  int results;
+  Data data;
+
+  ApiResponse({
+    required this.status,
+    required this.results,
+    required this.data,
+  });
+
+  factory ApiResponse.fromJson(Map<String, dynamic> json) {
+    return ApiResponse(
+      status: json['status'],
+      results: json['results'],
+      data: Data.fromJson(json['data']),
+    );
+  }
+}
+
+
+class Data {
+  List<WorkoutPlan> workoutplans;
+
+  Data({required this.workoutplans});
+
+  factory Data.fromJson(Map<String, dynamic> json) {
+    return Data(
+      workoutplans: (json['workoutplans'] as List)
+          .map((e) => WorkoutPlan.fromJson(e))
+          .toList(),
     );
   }
 }

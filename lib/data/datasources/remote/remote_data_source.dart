@@ -6,7 +6,7 @@ import 'package:srsappmultiplatform/domain/entities/Register.dart';
 import 'package:srsappmultiplatform/data/datasources/auth_local_storage.dart';
 import 'package:srsappmultiplatform/domain/entities/WorkoutPlanData.dart';
 class RemoteDataSource {
-  final String _baseUrl = "http://192.168.0.150:3001";
+  final String _baseUrl = "http://192.168.1.11:3001";
   final AuthLocalStorage _authLocalStorage;
 
   final headers = {
@@ -184,28 +184,31 @@ class RemoteDataSource {
   Future<Result<List<WorkoutPlan>>> fetchWorkoutPlansByUserId(String userId) async {
     try {
       final response = await http.get(
-        Uri.parse('$_baseUrl/api/workout-plans?userId=$userId'),
+        Uri.parse('$_baseUrl/api/users/user-workout-plans?userid=$userId'),
         headers: await _headers,
       );
 
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
-        final List<dynamic> workoutPlansJson = jsonResponse['data']['workoutPlans'];
+        final List<dynamic> workoutPlansJson = jsonResponse['data']['workoutplans']; // Change 'workoutPlans' to 'workoutplans'
         final List<WorkoutPlan> workoutPlans = workoutPlansJson.map((json) => WorkoutPlan.fromJson(json)).toList();
-
+        print("fetchworkout ${workoutPlans}");
         return Result.success(workoutPlans);
       } else {
+        print("fetchworkout failed ${response.body}");
         return Result.failure('Failed to fetch workout plans for user $userId');
       }
     } catch (e) {
+      print("fetchworkout failed ${e}");
       return Result.failure(e.toString());
     }
   }
 
+
   Future<Result<List<WorkoutPlan>>> fetchCompletedWorkoutPlans(String userId) async {
     try {
       final response = await http.get(
-        Uri.parse('$_baseUrl/api/workout-plans?userId=$userId&completed=true'),
+        Uri.parse('$_baseUrl/api/workout-plans?userid=$userId&completed=true'),
         headers: await _headers,
       );
 
