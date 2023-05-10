@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'User.dart';
+
 class LoginData {
   final User user;
   final String token;

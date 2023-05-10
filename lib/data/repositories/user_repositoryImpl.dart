@@ -65,7 +65,27 @@ class UserRepositoryImpl extends UserRepository {
 
   // ...
 
+  Future<Result<String>> checkTheTokenExpired() async{
+    try {
+      final result = await _remoteDataSource.checkTheTokenExpired();
+      print("userRepo: ${result}");
 
+      return result;
+    } catch (e) {
+      return Result.failure(e.toString());
+    }
+  }
+
+
+  @override
+  Future<User?> getValidUser() async {
+    final user = await _authLocalStorage.getUser();
+    if (user != null) {
+      return user;
+    } else {
+      return null;
+    }
+  }
   }
 
 

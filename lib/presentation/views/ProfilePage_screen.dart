@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:srsappmultiplatform/domain/entities/User.dart';
 import 'package:srsappmultiplatform/presentation/widgets/CustomProfileRow.dart';
-
+import 'package:srsappmultiplatform/data/datasources/auth_local_storage.dart';
+import 'package:get_it/get_it.dart';
+import 'package:srsappmultiplatform/core/di/service_locator.dart';
+import 'package:provider/provider.dart';
+import 'package:srsappmultiplatform/presentation/viewmodels/UserViewModel.dart';
 class ProfilePage extends StatefulWidget {
   final User user;
 
@@ -67,11 +71,14 @@ class ProfilePageState extends State<ProfilePage>
       appBar: AppBar(
         title: Text("ProfilePage"),
         actions: [
+          // Add the logout button inside a Center widget
           Center(
-         child: Padding(padding:EdgeInsets.fromLTRB(0, 0, 10, 0),
-         child: Text("Edit" ,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w600),)
+            child: IconButton(
+              icon: Icon(Icons.logout),
+              onPressed: () => logout(),
+            ),
           ),
-          ),
+          // ...
         ],
       ),
       body: Column(
@@ -202,4 +209,13 @@ class ProfilePageState extends State<ProfilePage>
     ];
 
   }
+  Future<void> logout() async {
+    UserViewModel userViewModel =
+    Provider.of<UserViewModel>(context, listen: false);
+    await userViewModel.logout();
+
+    // Navigate to the login page
+    Navigator.of(context).pushReplacementNamed('/login');
+  }
+
 }

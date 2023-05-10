@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'LoginData.dart';
+
 class LoginResponse {
   final String status;
   final LoginData data;

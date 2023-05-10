@@ -8,6 +8,8 @@ abstract class UserRepository {
   Future<Result<void>> register(Register registerData);
 
   Future<Result<User>> fetchUserInfo();
+  Future<Result<String>> checkTheTokenExpired();
+  Future<User?> getValidUser();
 
   // ...
 

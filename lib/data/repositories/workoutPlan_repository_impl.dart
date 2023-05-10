@@ -23,8 +23,11 @@ class WorkoutPlanRepositoryImpl implements WorkoutPlanRepository {
   Future<Result<List<WorkoutPlan>>> fetchCompletedWorkoutPlans(String userId) async {
     try {
       final completedWorkoutPlans = await _remoteDataSource.fetchCompletedWorkoutPlans(userId);
+      print("WorkoutRepo result ${completedWorkoutPlans.success.toString()}");
       return completedWorkoutPlans;
     } catch (e) {
+      print("WorkoutRepo result ${e.toString()}");
+
       return Result.failure("Error fetching completed workout plans: ${e.toString()}");
     }
   }

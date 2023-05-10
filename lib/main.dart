@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:get_it/get_it.dart';
 import 'package:srsappmultiplatform/data/datasources/auth_local_storage.dart';
+import 'package:srsappmultiplatform/domain/repositories/SocketRepository.dart';
+import 'package:srsappmultiplatform/presentation/viewmodels/SocketViewModel.dart';
 import 'package:srsappmultiplatform/presentation/views/trainee_dashboard_screen.dart';
 import 'package:srsappmultiplatform/data/datasources/remote/remote_data_source.dart';
 import 'package:srsappmultiplatform/core/di/service_locator.dart';
 import 'package:srsappmultiplatform/domain/repositories/WorkoutPlanRepository.dart';
+import 'package:srsappmultiplatform/domain/entities/User.dart';
 import 'package:srsappmultiplatform/presentation/viewmodels/UserViewModel.dart';
 import 'package:srsappmultiplatform/presentation/views/login_screen.dart';
 import 'package:srsappmultiplatform/presentation/views/register_screen.dart';
@@ -25,11 +28,18 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<UserViewModel>(
-          create: (_) => UserViewModel(
-            userRepository: GetIt.I.get<UserRepositoryImpl>(),
-            workoutPlanRepository: GetIt.I.get<WorkoutPlanRepository>(),
-          ),
+          create: (_) =>
+              UserViewModel(
+                userRepository: GetIt.I.get<UserRepositoryImpl>(),
+                workoutPlanRepository: GetIt.I.get<WorkoutPlanRepository>(),
+              ),
+              
         ),
+        ChangeNotifierProvider<SocketViewModel>(  // new changes
+        create: (_) => SocketViewModel(
+           socketRepository: GetIt.I.get<SocketRepository>(),
+        ),
+        )
       ],
       child: MaterialApp(
         title: 'Flutter Demo',
@@ -77,55 +87,67 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     UserViewModel userViewModel = Provider.of<UserViewModel>(context);
+    userViewModel.getValidUser();
 
-    return Scaffold(
+    return ValueListenableBuilder<User?>(
+      valueListenable: userViewModel.userNotifier,
+      builder: (context, user, child) {
+        if (user == null) {
+          return Scaffold(
+          
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
 
-        body: PageView(
-          controller: _pageController,
-          physics: NeverScrollableScrollPhysics(),
-          children: [
-            TraineeDashboardScreen(),
-            ExerciseProgram(userId: userViewModel.user?.id ?? "",),
-            ChatPage(),
-            ProfilePage(user: userViewModel.user!!,),
-
-
-
-          ],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-        icon: Icon(Icons.dashboard),
-    label: 'Dashboard',
-    ),
-    BottomNavigationBarItem(
-    icon: Icon(Icons.fitness_center),
-    label: 'Program',
-    ),
-    BottomNavigationBarItem(
-    icon: Icon(Icons.chat),
-    label: 'Chat',
-    ),
-    BottomNavigationBarItem(
-    icon: Icon(Icons.person),
-    label: 'Profile',
-    ),
-    ],
-    currentIndex: _currentIndex,
-    unselectedItemColor: Colors.black,
-    selectedItemColor: Colors.blue,
-    onTap: (int index) {
-      setState(() {
-        _currentIndex = index;
-        _pageController.animateToPage(
-          index,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.ease,
+        return Scaffold(
+          body: PageView(
+            controller: _pageController,
+            physics: NeverScrollableScrollPhysics(),
+            children: [
+              TraineeDashboardScreen(),
+              ExerciseProgram(userId: user.id),
+              ChatPage(),
+              ProfilePage(user: user),
+            ],
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.dashboard),
+                label: 'Dashboard',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.fitness_center),
+                label: 'Program',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.chat),
+                label: 'Chat',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person),
+                label: 'Profile',
+              ),
+            ],
+            currentIndex: _currentIndex,
+            unselectedItemColor: Colors.black,
+            selectedItemColor: Colors.blue,
+            onTap: (int index) {
+              setState(() {
+                _currentIndex = index;
+                _pageController.animateToPage(
+                  index,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.ease,
+                );
+              });
+            },
+          ),
         );
-      });
-    },
-        ),
+      },
     );
   }
 }
+

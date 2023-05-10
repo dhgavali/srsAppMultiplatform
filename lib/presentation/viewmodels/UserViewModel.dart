@@ -9,14 +9,26 @@ import 'package:srsappmultiplatform/domain/usecases/FetchCompletedWorkoutPlansUs
 import 'package:srsappmultiplatform/domain/usecases/FetchUserInfoUseCase.dart';
 import 'package:srsappmultiplatform/domain/usecases/FetchWorkoutPlansByUserIdUseCase.dart';
 import 'package:srsappmultiplatform/domain/usecases/UserLoginUseCase.dart';
+import 'package:srsappmultiplatform/domain/usecases/CheckTheTokenExpiredUseCase.dart';
 import 'package:srsappmultiplatform/domain/usecases/UserRegisterUseCase.dart';
+import 'package:srsappmultiplatform/data/datasources/auth_local_storage.dart';
+import 'package:get_it/get_it.dart';
+import 'package:provider/provider.dart';
+
+import 'package:srsappmultiplatform/core/di/service_locator.dart';
 
 class UserViewModel with ChangeNotifier {
   final UserLoginUseCase _userLoginUseCase;
+  final CheckTheTokenExpiredUseCase _checkTheTokenExpiredUseCase;
   final UserRegisterUseCase _userRegisterUseCase;
   final FetchUserInfoUseCase _fetchUserInfoUseCase;
   final FetchCompletedWorkoutPlansUseCase _fetchCompletedWorkoutPlansUseCase;
   final FetchWorkoutPlansByUserIdUseCase _fetchWorkoutPlansByUserIdUseCase;
+  AuthLocalStorage authLocalStorage = getIt<AuthLocalStorage>();
+  UserRepository userRepository = getIt<UserRepository>();
+
+  ValueNotifier<User?> userNotifier = ValueNotifier(null);
+
 
   UserViewModel(
       {required UserRepository userRepository, required WorkoutPlanRepository workoutPlanRepository})
@@ -29,7 +41,10 @@ class UserViewModel with ChangeNotifier {
         _fetchWorkoutPlansByUserIdUseCase = FetchWorkoutPlansByUserIdUseCase(
             workoutPlanRepository: workoutPlanRepository),
         _fetchCompletedWorkoutPlansUseCase = FetchCompletedWorkoutPlansUseCase(
-            workoutPlanRepository: workoutPlanRepository);
+            workoutPlanRepository: workoutPlanRepository),
+        _checkTheTokenExpiredUseCase = CheckTheTokenExpiredUseCase(
+            userRepository: userRepository);
+
 
   User? _user;
 
@@ -59,7 +74,7 @@ class UserViewModel with ChangeNotifier {
           (user) {
         // Set the _user object here
         _user = user;
-        if(user == null){
+        if (user == null) {
           print("userViewModel");
         }
         notifyListeners();
@@ -116,17 +131,52 @@ class UserViewModel with ChangeNotifier {
   }
 
   Future<void> fetchCompletedWorkoutPlans(String userId) async {
+    print("UserViewModel userId $userId");
     final result = await _fetchCompletedWorkoutPlansUseCase.call(userId);
     result.fold(
           (failure) {
         _errorMessage = failure;
+        print("UserViewModel failure $failure");
         notifyListeners();
       },
           (completedWorkoutPlans) {
+        authLocalStorage.printAll();
+
         _completedWorkoutPlans = completedWorkoutPlans;
+        print("UserViewModel result $_completedWorkoutPlans");
         notifyListeners();
       },
     );
   }
+
+  Future<void> logout() async {
+    // Clear workout plans
+    workoutPlans.clear();
+    // Clear the bearer token from shared preferences
+await authLocalStorage.deleteUser();
+    await authLocalStorage.printAll();
+    await authLocalStorage.clearAuthToken();
+  }
+  Future<void> checkTheTokenExpired(Function(String) onRoleFetched) async {
+    print("UserViewModel checkTheTokenExpired");
+    final result = await _checkTheTokenExpiredUseCase.call();
+
+    result.fold((failure) {
+      print("UserViewModel $failure");
+      _errorMessage = failure;
+    }, (role) {
+      print("UserViewModel $role");
+      onRoleFetched(role);
+    });
+  }
+
+  Future<void> getValidUser() async {
+    final user = userRepository.getValidUser();
+    userNotifier.value = await user;
+  }
+
+
+
+
 }
 

@@ -14,8 +14,14 @@ import 'package:srsappmultiplatform/domain/usecases/FetchCompletedWorkoutPlansUs
 import 'package:srsappmultiplatform/domain/repositories/WorkoutPlanRepository.dart';
 import 'package:srsappmultiplatform/data/repositories/workoutPlan_repository_impl.dart';
 import 'package:srsappmultiplatform/domain/repositories/UserRepository.dart';
+import 'package:srsappmultiplatform/domain/usecases/ConnectUseCase.dart';
+import 'package:srsappmultiplatform/domain/usecases/DisconnectUseCase.dart';
+import 'package:srsappmultiplatform/domain/usecases/SendMessageUseCase.dart';
+import 'package:srsappmultiplatform/presentation/viewmodels/SocketViewModel.dart';
 
-
+import '../../data/datasources/remote/SocketDataSource.dart';
+import 'package:srsappmultiplatform/data/repositories/SocketRepositoryImpl.dart';
+import 'package:srsappmultiplatform/domain/repositories/SocketRepository.dart';
 
 
 final getIt = GetIt.instance;
@@ -75,15 +81,39 @@ void setupServiceLocator() {
         () => FetchCompletedWorkoutPlansUseCase(workoutPlanRepository: getIt<WorkoutPlanRepository>()),
   );
 
+
+
+
+
   create: (_) => UserViewModel(
     userRepository: getIt<UserRepository>(),
     workoutPlanRepository: getIt<WorkoutPlanRepository>(),
   );
   getIt.registerFactory<UserViewModel>(
-  () => UserViewModel(
-  userRepository: getIt<UserRepository>(),
-  workoutPlanRepository: getIt<WorkoutPlanRepository>(),
-  ),
+        () => UserViewModel(
+      userRepository: getIt<UserRepository>(),
+      workoutPlanRepository: getIt<WorkoutPlanRepository>(),
+    ),
   );
+  getIt.registerSingleton<UserRepository>(
+    UserRepositoryImpl(
+      remoteDataSource: getIt<RemoteDataSource>(),
+      authLocalStorage: getIt<AuthLocalStorage>(),
+    ),
+  );
+
+
+  getIt.registerSingleton<SocketDataSource>(SocketDataSource());
+  getIt.registerSingleton<SocketRepository>(SocketRepositoryImpl(socketDataSource: getIt<SocketDataSource>()));
+
+  getIt.registerFactory<ConnectUseCase>(() => ConnectUseCase(getIt<SocketRepository>()));
+  getIt.registerFactory<DisconnectUseCase>(() => DisconnectUseCase(getIt<SocketRepository>()));
+  getIt.registerFactory<SendMessageUseCase>(() => SendMessageUseCase(getIt<SocketRepository>()));
+  getIt.registerFactory<SocketViewModel>(
+      () => SocketViewModel(socketRepository: getIt<SocketRepository>()));
+
+
+
+
 
 }

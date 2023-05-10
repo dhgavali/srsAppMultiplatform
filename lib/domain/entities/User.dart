@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class User {
   final String id;
   final String username;
@@ -20,16 +22,35 @@ class User {
     this.role,
     required this.dateOfBirth,
     required this.phone,
-     this.exerciseLevel,
-     this.height,
-     this.weight,
-     this.muscleMass,
-     this.bodyFatPercentage,
+    this.exerciseLevel,
+    this.height,
+    this.weight,
+    this.muscleMass,
+    this.bodyFatPercentage,
   });
+
+
+  Map<String, dynamic> toUserJson() {
+    return {
+      'id': id,
+      'username': username,
+      'email': email,
+      'token': token,
+      'phone': phone,
+      'role': role,
+      'dateOfBirth': dateOfBirth,
+      'exerciseLevel': exerciseLevel?.toJson(),
+      'height': height,
+      'weight': weight,
+      'muscleMass': muscleMass,
+      'bodyFatPercentage': bodyFatPercentage,
+    };
+  }
+
   factory User.fromJson(Map<String, dynamic> jsonMap) {
     return User(
       id: jsonMap['id'] ?? '',
-      username: jsonMap['fullName'] ?? '',
+      username: jsonMap['username'] ?? '',
       email: jsonMap['email'] ?? '',
       token: jsonMap['token'] ?? '',
       role: jsonMap['role'] as String?,
@@ -42,6 +63,24 @@ class User {
       bodyFatPercentage: jsonMap['bodyFatPercentage'] ?? 0,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'username': username,
+      'email': email,
+      'token': token,
+      'role': role,
+      'dateOfBirth': dateOfBirth,
+      'phone': phone,
+      'exerciseLevel': exerciseLevel?.toJson(),
+      'height': height,
+      'weight': weight,
+      'muscleMass': muscleMass,
+      'bodyFatPercentage': bodyFatPercentage,
+    };
+  }
+
 
 
   User copyWith({
@@ -68,9 +107,8 @@ class User {
       bodyFatPercentage: bodyFatPercentage ?? this.bodyFatPercentage,
     );
   }
-
-// Other methods or properties as needed
 }
+
 class ExerciseLevel {
   final int? squat;
   final int? benchPress;
@@ -79,11 +117,11 @@ class ExerciseLevel {
   final int? deadLift;
 
   ExerciseLevel({
-     this.squat,
-     this.benchPress,
-     this.pullUpReps,
-     this.pushUpReps,
-     this.deadLift,
+    this.squat,
+    this.benchPress,
+    this.pullUpReps,
+    this.pushUpReps,
+    this.deadLift,
   });
 
   factory ExerciseLevel.fromJson(Map<String, dynamic> json) {
@@ -106,3 +144,8 @@ class ExerciseLevel {
     };
   }
 }
+
+
+
+
+

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:srsappmultiplatform/presentation/viewmodels/UserViewModel.dart';
 import 'package:provider/provider.dart';
 import 'package:srsappmultiplatform/presentation/views/admin_dashboard_screen.dart'; // Import the AdminDashboardScreen
+import 'package:srsappmultiplatform/presentation/views/trainee_dashboard_screen.dart'; // Import the AdminDashboardScreen
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -103,5 +104,29 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  void _onRoleFetched(String role) {
+    print("_onRoleFetched redirect");
+
+    if (role == 'admin') {
+      print("admin redirect");
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => AdminDashboardScreen()),
+      );
+    } else if (role == 'trainee') {
+      print("trainee redirect");
+      Navigator.pushReplacementNamed(context, '/traineeDashboard');
+
+    }
+  }
+
+  @override
+  void initState() {
+    final viewModel = Provider.of<UserViewModel>(context, listen: false);
+
+    viewModel.checkTheTokenExpired(_onRoleFetched);
   }
 }

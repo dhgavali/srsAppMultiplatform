@@ -1,13 +1,18 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:io'; // This import is needed for SocketException and HttpException
 import 'package:srsappmultiplatform/core/result.dart';
 import 'package:srsappmultiplatform/domain/entities/User.dart';
 import 'package:srsappmultiplatform/domain/entities/Register.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+
 import 'package:srsappmultiplatform/data/datasources/auth_local_storage.dart';
 import 'package:srsappmultiplatform/domain/entities/WorkoutPlanData.dart';
 class RemoteDataSource {
   final String _baseUrl = "http://192.168.0.150:3001";
   final AuthLocalStorage _authLocalStorage;
+
+  late IO.Socket _socket;
 
   final headers = {
     'Content-Type': 'application/json',
@@ -59,7 +64,7 @@ class RemoteDataSource {
       if (response.statusCode == 200) {
         // Parse the response JSON
         final jsonResponse = jsonDecode(response.body);
-
+await _authLocalStorage.printAll();
         // Extract the token and role from the parsed JSON
         String token = jsonResponse['data']['token'];
         String? role = jsonResponse['data']['user']['role'];
@@ -69,6 +74,7 @@ class RemoteDataSource {
 
         // Update the User object with the fetched token and role
         user = user.copyWith(token: token, role: role);
+        await _authLocalStorage.saveUser(user);
 
         return Result.success(user);
       } else {
@@ -127,6 +133,7 @@ class RemoteDataSource {
 
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
+        await _authLocalStorage.saveUser(user);
         return Result.success(User.fromJson(jsonResponse));
       } else {
         return Result.failure('Failed to update user ${user.id}');
@@ -183,8 +190,9 @@ class RemoteDataSource {
 
   Future<Result<List<WorkoutPlan>>> fetchWorkoutPlansByUserId(String userId) async {
     try {
+      print("$_baseUrl/api/users/user-workout-plans?userid=${userId}");
       final response = await http.get(
-        Uri.parse('$_baseUrl/api/users/user-workout-plans?userid=$userId'),
+        Uri.parse('$_baseUrl/api/users/user-workout-plans?userId=$userId'),
         headers: await _headers,
       );
 
@@ -208,11 +216,12 @@ class RemoteDataSource {
   Future<Result<List<WorkoutPlan>>> fetchCompletedWorkoutPlans(String userId) async {
     try {
       final response = await http.get(
-        Uri.parse('$_baseUrl/api/workout-plans?userid=$userId&completed=true'),
+        Uri.parse('$_baseUrl/api/users/user-workout-plans?userid=$userId&completed=true'),
         headers: await _headers,
       );
 
       if (response.statusCode == 200) {
+        print("response Workout userId:$userId ${response.body.toString()}");
         final jsonResponse = jsonDecode(response.body);
         final List<dynamic> workoutPlansJson = jsonResponse['data']['workoutPlans'];
         final List<WorkoutPlan> workoutPlans = workoutPlansJson.map((json) => WorkoutPlan.fromJson(json)).toList();
@@ -224,6 +233,65 @@ class RemoteDataSource {
     } catch (e) {
       return Result.failure(e.toString());
     }
+  }
+  Future<Result<String>> checkTheTokenExpired() async {
+    try {
+      final token = await _authLocalStorage.getAuthToken();
+      if (token == null) {
+        print("Token is null");
+        return Result.failure('Token not found');
+      }
+      print("Sending HTTP GET request to check token expiration...");
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/users/check-token-expiration'),
+        headers: await _headers,
+      );
+print("ResponseToken ${response.body.toString()}");
+      if (response.statusCode == 400) {
+        print("Token format is incorrect or not provided");
+        return Result.failure("No token provided or token format is incorrect");
+      } else if (response.statusCode == 401) {
+        print("Token expired. Login again");
+        return Result.failure("Token expired. Login again");
+      } else if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        final String role = jsonResponse['data']['role']; // Assuming the server returns the role as 'role' key in the JSON response.
+        print("Token is still valid. Role: $role");
+        return Result.success(role);
+      }
+
+      print("Unexpected error occurred");
+      return Result.failure("Unexpected error occurred");
+    } on SocketException {
+      print("No Internet connection");
+      return Result.failure("No Internet connection");
+    } on HttpException {
+      print("Couldn't reach the server");
+      return Result.failure("Couldn't reach the server");
+    } on FormatException {
+      print("Bad response format");
+      return Result.failure("Bad response format");
+    } catch (e) {
+      print("An error occurred: $e");
+      return Result.failure(e.toString());
+    }
+  }
+
+
+ void initSocket() {
+    _socket = IO.io(_baseUrl, <String, dynamic>{
+      'transports': ['websocket'],
+    });
+
+    _socket.on('connect', (_) {
+      print('Connected to Socket.IO server');
+    });
+
+    _socket.on('disconnect', (_) => print('Disconnected from Socket.IO server'));
+
+    // Add event listeners for trainer request updates here
+
+    _socket.connect();
   }
 
 }
