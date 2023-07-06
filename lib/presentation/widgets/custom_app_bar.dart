@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:srsappmultiplatform/utils/size_utils.dart';
 // ignore: must_be_immutable
-class CustomAppBar extends StatelessWidget with PreferredSizeWidget {
+class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   CustomAppBar(
       {required this.height,
       this.leadingWidth,
